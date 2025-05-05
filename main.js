@@ -2,7 +2,6 @@
 const scene = new THREE.Scene();
 
 // --- Camera Setup ---
-// PerspectiveCamera( fieldOfView, aspectRatio, near, far )
 const camera = new THREE.PerspectiveCamera(
     75, // Field of view (in degrees)
     window.innerWidth / window.innerHeight, // Aspect ratio
@@ -11,36 +10,51 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 // --- Renderer Setup ---
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true }); // Added antialiasing for smoother edges
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement); // Add the canvas to the HTML body
+document.body.appendChild(renderer.domElement);
 
 // --- Create the Container Box (Level Geometry) ---
-// We'll make this a wireframe box so we can see inside
-const containerGeometry = new THREE.BoxGeometry(10, 10, 10); // A 10x10x10 box
+const containerGeometry = new THREE.BoxGeometry(10, 10, 10);
 const containerMaterial = new THREE.MeshBasicMaterial({
-    color: 0xcccccc, // Grey color
-    wireframe: true // Show only the edges
+    color: 0xcccccc,
+    wireframe: true
 });
 const containerBox = new THREE.Mesh(containerGeometry, containerMaterial);
 scene.add(containerBox);
 
 // --- Create the Player Box ---
-const playerGeometry = new THREE.BoxGeometry(1, 1, 1); // A 1x1x1 player box
-const playerMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 }); // Red material
+const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+const playerMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 }); // Red material (affected by light)
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
 scene.add(player);
 
-// --- Position the Player and Camera ---
-// Position the player box slightly off the center for visibility
-player.position.set(0, 0, 0); // Start at the center of the container
+// --- Player Movement Setup ---
+const playerSpeed = 0.05; // How fast the player moves
+const keysPressed = {}; // Object to track which keys are currently held down
 
-// Position the camera behind the player
-// We'll offset it relative to the player's position
-const cameraOffset = new THREE.Vector3(0, 1, 3); // e.g., 3 units back, 1 unit up relative to player
+// Event Listeners for keyboard input
+window.addEventListener('keydown', (event) => {
+    // Convert key to lowercase to handle both cases (e.g., 'W' and 'w')
+    keysPressed[event.key.toLowerCase()] = true;
+    // Prevent default browser actions for arrow keys or space, if needed later
+    // if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) {
+    //     event.preventDefault();
+    // }
+});
+
+window.addEventListener('keyup', (event) => {
+    keysPressed[event.key.toLowerCase()] = false;
+});
+
+// --- Position the Player and Camera ---
+player.position.set(0, 0, 0); // Start player at the center
+
+// Define the camera's desired offset from the player
+const cameraOffset = new THREE.Vector3(0, 1.5, 3); // e.g., 3 units back, 1.5 units up relative to player
 
 function updateCameraPosition() {
-    // Set the camera's position based on the player's position plus the offset
+    // Set the camera's position by adding the offset to the player's position
     camera.position.copy(player.position).add(cameraOffset);
     // Make the camera look at the player's position
     camera.lookAt(player.position);
@@ -48,31 +62,40 @@ function updateCameraPosition() {
 
 updateCameraPosition(); // Set initial camera position
 
-// --- Add Lighting ---
-// Add some ambient light so the red material (MeshPhongMaterial) is visible
+// --- Add Lighting (Already present, but confirming) ---
 const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
 scene.add(ambientLight);
 
-// Add a directional light for clearer shading
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // White light with intensity
-directionalLight.position.set(5, 5, 5).normalize(); // Position the light
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(5, 5, 5).normalize();
 scene.add(directionalLight);
+
 
 // --- Animation Loop ---
 function animate() {
     requestAnimationFrame(animate); // Ask the browser to call animate again before the next frame
 
-    // --- Game Logic Updates (Placeholder) ---
-    // This is where you would put player movement, physics, etc.
-    // For now, let's just rotate the player and container slightly to show it's working
-    player.rotation.x += 0.005;
-    player.rotation.y += 0.005;
+    // --- Player Movement Logic ---
+    // Check the 'keysPressed' object and update player position accordingly
+    if (keysPressed['w']) {
+        // Move forward (decrease Z in world coordinates)
+        player.position.z -= playerSpeed;
+    }
+    if (keysPressed['s']) {
+        // Move backward (increase Z in world coordinates)
+        player.position.z += playerSpeed;
+    }
+    if (keysPressed['a']) {
+        // Move left (decrease X in world coordinates)
+        player.position.x -= playerSpeed;
+    }
+    if (keysPressed['d']) {
+        // Move right (increase X in world coordinates)
+        player.position.x += playerSpeed;
+    }
 
-    // containerBox.rotation.x += 0.001;
-    // containerBox.rotation.y += 0.001;
-
-    // If player position changes, update the camera
-    // updateCameraPosition();
+    // IMPORTANT: Update camera position *after* the player's position has been changed
+    updateCameraPosition();
 
     // --- Render the Scene ---
     renderer.render(scene, camera);
@@ -84,7 +107,6 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 
 // Start the animation loop
 animate();
