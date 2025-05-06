@@ -9,8 +9,8 @@ const createScene = function () {
     scene.collisionsEnabled = true;
 
     // Player
-    const player = BABYLON.MeshBuilder.CreateBox("player", { size: 2 }, scene); // Revert to a box for the player
-    player.position = new BABYLON.Vector3(0, 5, 0);
+    const player = BABYLON.MeshBuilder.CreateBox("player", { size: 2 }, scene); // Simple box for the player
+    player.position = new BABYLON.Vector3(0, 5, 0); // Start above the ground at the center
     player.material = new BABYLON.StandardMaterial("playerMat", scene);
     player.material.diffuseColor = new BABYLON.Color3(1.0, 0.5, 0.0); // Orange
     player.checkCollisions = true; // Enable collisions for the player
@@ -35,49 +35,30 @@ const createScene = function () {
     // Ground
     const groundSize = 200;
     const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: groundSize, height: groundSize, subdivisions: 50 }, scene);
+    ground.position = new BABYLON.Vector3(0, 0, 0); // Center the ground
     ground.material = new BABYLON.StandardMaterial("groundMat", scene);
     ground.material.diffuseColor = new BABYLON.Color3(0.4, 0.7, 0.4); // Grass color
     ground.checkCollisions = true; // Enable collisions for the ground
 
-    // Forest (Trees and Rocks)
-    const numberOfTrees = 100;
-    const numberOfRocks = 50;
-    const forestArea = groundSize / 2 - 5;
-
-    const trunkMaterial = new BABYLON.StandardMaterial("trunkMat", scene);
-    trunkMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.3, 0.1); // Brown
-    const leafMaterial = new BABYLON.StandardMaterial("leafMat", scene);
-    leafMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.5, 0.2); // Green
-
-    for (let i = 0; i < numberOfTrees; i++) {
-        const x = (Math.random() - 0.5) * forestArea * 2;
-        const z = (Math.random() - 0.5) * forestArea * 2;
-
-        const trunkHeight = BABYLON.Scalar.RandomRange(3, 6);
-        const trunk = BABYLON.MeshBuilder.CreateCylinder(`trunk${i}`, { height: trunkHeight, diameterTop: 0.5, diameterBottom: 0.8 }, scene);
-        trunk.position = new BABYLON.Vector3(x, trunkHeight / 2, z);
-        trunk.material = trunkMaterial;
-        trunk.checkCollisions = true; // Enable collisions for the tree trunk
-
-        const leafHeight = BABYLON.Scalar.RandomRange(2, 4);
-        const leaves = BABYLON.MeshBuilder.CreateSphere(`leaves${i}`, { diameter: leafHeight * 1.5 }, scene);
-        leaves.position = new BABYLON.Vector3(x, trunkHeight + leafHeight * 0.5, z);
-        leaves.material = leafMaterial;
-        leaves.parent = trunk; // Attach leaves to the trunk
-    }
-
-    const rockMaterial = new BABYLON.StandardMaterial("rockMat", scene);
-    rockMaterial.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3); // Gray
-
-    for (let i = 0; i < numberOfRocks; i++) {
-        const x = (Math.random() - 0.5) * forestArea * 2;
-        const z = (Math.random() - 0.5) * forestArea * 2;
-
-        const rock = BABYLON.MeshBuilder.CreateSphere(`rock${i}`, { diameter: BABYLON.Scalar.RandomRange(0.5, 2) }, scene);
-        rock.position = new BABYLON.Vector3(x, rock.getBoundingInfo().boundingBox.extendSize.y, z);
-        rock.material = rockMaterial;
-        rock.checkCollisions = true; // Enable collisions for rocks
-    }
+    // Load the Level (3D Model)
+    BABYLON.SceneLoader.ImportMesh(
+        "", // Leave empty to load all meshes
+        "./assets/", // Path to the model directory
+        "level.obj", // Model file name
+        scene,
+        function (meshes) {
+            console.log("Level loaded successfully!");
+            meshes.forEach((mesh) => {
+                mesh.position = new BABYLON.Vector3(0, 0, 0); // Center the model
+                mesh.scaling = new BABYLON.Vector3(5, 5, 5); // Scale the model
+                mesh.checkCollisions = true; // Enable collisions
+            });
+        },
+        null,
+        function (scene, message, exception) {
+            console.error("Error loading level:", message, exception);
+        }
+    );
 
     // Player Movement
     const moveSpeed = 8;
@@ -153,6 +134,9 @@ const createScene = function () {
         scene.render();
     });
 
+    // Show debug layer
+    scene.debugLayer.show();
+
     return scene;
 };
 
@@ -160,4 +144,14 @@ const scene = createScene();
 
 window.addEventListener("resize", function () {
     engine.resize();
+});
+
+window.addEventListener("keydown", (event) => {
+    if (event.key === "p") { // Press "P" to toggle the debug layer
+        if (scene.debugLayer.isVisible()) {
+            scene.debugLayer.hide();
+        } else {
+            scene.debugLayer.show();
+        }
+    }
 });
