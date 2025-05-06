@@ -144,3 +144,13 @@ const scene = createScene();
 window.addEventListener("resize", function () {
     engine.resize();
 });
+
+window.addEventListener("keydown", (event) => {
+    if (event.key === "p") { // Press "P" to toggle the debug layer
+        if (scene.debugLayer.isVisible()) {
+            scene.debugLayer.hide();
+        } else {
+            scene.debugLayer.show();
+        }
+    }
+});
