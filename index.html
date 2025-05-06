@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple 3D Box Scene</title>
+    <meta charset="UTF-8">
+    <title>Babylon.js Basic Room with Player and Platforms</title>
     <style>
-        body { margin: 0; overflow: hidden; } /* Remove default margin and scrollbars */
-        canvas { display: block; }
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
     </style>
 </head>
 <body>
-    <!-- Include Three.js library from a CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.164.1/three.min.js"></script>
-    <!-- Your main game script -->
-    <script src="main.js"></script>
+    <canvas id="renderCanvas"></canvas>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/handlers/babylon.sound.js"></script>
+    <script src="script2.js"></script>
 </body>
 </html>
