@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>test for 3d game</title>
+    <title>Level Editor</title>
     <style>
         html, body {
             overflow: hidden;
@@ -16,12 +16,18 @@
             height: 100%;
             touch-action: none;
         }
+        button {
+            position: absolute;
+            z-index: 100;
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/handlers/babylon.sound.js"></script>
-    <script src="script2.js"></script>
+    <script src="levelEditor.js"></script>
 </body>
 </html>
